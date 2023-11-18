@@ -90,6 +90,52 @@ resource "azurerm_storage_account" "my_storage_account" {
   account_replication_type = "LRS"
 }
 
+
+resource "tls_private_key" "ssh_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+
+resource "azurerm_ssh_public_key" "generated_key" {
+  name                = "linux-vm-002_key"
+  location                 = azurerm_resource_group.rg.location
+  resource_group_name      = azurerm_resource_group.rg.name
+  public_key = tls_private_key.ssh_key.public_key_openssh
+}
+
+resource "azurerm_key_vault" "kv" {
+  name = "linux-vm-002-kv"
+  location                 = azurerm_resource_group.rg.location
+  resource_group_name      = azurerm_resource_group.rg.name
+  tenant_id = "d84694ff-8b04-4a3c-a6c9-8789bfa51ed8"
+  sku_name = "standard"
+
+  access_policy {
+    tenant_id = "d84694ff-8b04-4a3c-a6c9-8789bfa51ed8"
+    object_id = "985cb20f-e6b6-499c-91c6-f63215664c89"
+     key_permissions = [
+    "get", "list", "update", "create", "import", "delete", "recover", "backup", "restore",
+    ]
+
+    secret_permissions = [
+    "get", "list", "delete", "recover", "backup", "restore", "set",
+    ]
+
+    certificate_permissions = [
+    "get", "list", "update", "create", "import", "delete", "recover", "backup", "restore", "deleteissuers", "getissuers", "listissuers", "managecontacts", "manageissuers", "setissuers",
+    ] 
+  }
+}
+
+resource "azurerm_key_vault_secret" "kv-vm-secret" {
+  key_vault_id = azurerm_key_vault.kv.id
+  name = azurerm_key_vault.kv.name
+  value = tls_private_key.ssh_key.public_key_openssh
+  
+}
+
+
 # Create virtual machine
 resource "azurerm_linux_virtual_machine" "my_terraform_vm" {
   name                  = "linux-vm-002"
@@ -116,7 +162,7 @@ resource "azurerm_linux_virtual_machine" "my_terraform_vm" {
 
   admin_ssh_key {
     username   = var.username
-    public_key = file("${path.root}/ssh-keys/terraform-azure.pem.pub")
+    public_key = azurerm_key_vault_secret.kv-vm-secret.value
   }
 
   boot_diagnostics {

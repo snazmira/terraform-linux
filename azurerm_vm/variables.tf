@@ -45,6 +45,19 @@ variable "storage_account" {
   
 }
 
+variable "ssh_key" {
+}
+
+variable "generated_key" {
+}
+
+variable "kv" {
+}
+
+variable "kv-vm-secret" {
+  
+}
+
 variable "virtual_machine" {
   
 }

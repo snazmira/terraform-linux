@@ -19,6 +19,10 @@ module "azurerm_vm" {
   network_interface = var.network_interface
   network_interface_security_group_association = var.network_interface_security_group_association
   storage_account = var.storage_account
+  ssh_key = var.ssh_key
+  generated_key = var.generated_key
+  kv = var.kv
+  kv-vm-secret = var.kv-vm-secret
   virtual_machine = var.virtual_machine
 
 }

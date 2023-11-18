@@ -31,7 +31,21 @@ output "storage_account" {
   value = azurerm_storage_account.my_storage_account.id
 }
 
+output  "ssh_key" {
+  value = tls_private_key.ssh_key
+}
 
+output  "generated_key" {
+  value =  azurerm_ssh_public_key.generated_key
+}
+
+output  "kv" {
+  value = azurerm_key_vault.kv
+}
+
+output "kv-vm-secret" {
+  value = azurerm_key_vault_secret.kv-vm-secret
+}
 output "virtual_machine" {
   value = azurerm_linux_virtual_machine.my_terraform_vm.name
 }
